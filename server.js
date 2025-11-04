@@ -24,6 +24,21 @@ app.get('/api/events', async (_, res) => {
   res.json(events);
 });
 
+// E2E 테스트용 DB 초기화 엔드포인트
+app.post('/api/reset', async (req, res) => {
+  // E2E 환경에서만 동작
+  if (process.env.TEST_ENV !== 'e2e') {
+    return res.status(403).json({ error: 'Reset is only allowed in E2E test environment' });
+  }
+
+  fs.writeFileSync(
+    `${__dirname}/src/__mocks__/response/${dbName}`,
+    JSON.stringify({ events: [] })
+  );
+
+  res.status(200).json({ message: 'Database reset successfully' });
+});
+
 app.post('/api/events', async (req, res) => {
   const events = await getEvents();
   const newEvent = { id: randomUUID(), ...req.body };
