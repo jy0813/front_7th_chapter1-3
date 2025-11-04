@@ -108,3 +108,27 @@ export function formatDate(currentDate: Date, day?: number) {
     fillZero(day ?? currentDate.getDate()),
   ].join('-');
 }
+
+/**
+ * 두 날짜 간의 일수 차이를 계산합니다.
+ * @param oldDate - 이전 날짜 (YYYY-MM-DD 형식)
+ * @param newDate - 새로운 날짜 (YYYY-MM-DD 형식)
+ * @returns 일수 차이 (newDate - oldDate)
+ */
+export function calculateDaysDiff(oldDate: string, newDate: string): number {
+  const old = new Date(oldDate);
+  const newD = new Date(newDate);
+  return Math.floor((newD.getTime() - old.getTime()) / (1000 * 60 * 60 * 24));
+}
+
+/**
+ * 날짜에 일수를 더합니다.
+ * @param dateString - 기준 날짜 (YYYY-MM-DD 형식)
+ * @param days - 더할 일수 (음수 가능)
+ * @returns 계산된 날짜 (YYYY-MM-DD 형식)
+ */
+export function addDays(dateString: string, days: number): string {
+  const date = new Date(dateString);
+  date.setDate(date.getDate() + days);
+  return formatDate(date);
+}

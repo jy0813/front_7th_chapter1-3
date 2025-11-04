@@ -50,6 +50,8 @@ import { useRecurringEventOperations } from './hooks/useRecurringEventOperations
 import { useSearch } from './hooks/useSearch.ts';
 import { Event, EventForm, RepeatType } from './types.ts';
 import {
+  addDays,
+  calculateDaysDiff,
   formatDate,
   formatMonth,
   formatWeek,
@@ -126,13 +128,12 @@ function App() {
   const { events, saveEvent, updateEvent, deleteEvent, createRepeatEvent, fetchEvents } =
     useEventOperations(Boolean(editingEvent), () => setEditingEvent(null));
 
-  const { handleRecurringEdit, handleRecurringDelete } = useRecurringEventOperations(
-    events,
-    async () => {
+  const { handleRecurringEdit, handleRecurringDelete, findRelatedRecurringEvents } =
+    useRecurringEventOperations(events, async () => {
       // After recurring edit, refresh events from server
       await fetchEvents();
-    }
-  );
+      setEditingEvent(null);
+    });
 
   const { notifications, notifiedEvents, setNotifications } = useNotifications(events);
   const { view, setView, currentDate, holidays, navigate } = useCalendarView();
@@ -144,19 +145,37 @@ function App() {
   const [pendingRecurringEdit, setPendingRecurringEdit] = useState<Event | null>(null);
   const [pendingRecurringDelete, setPendingRecurringDelete] = useState<Event | null>(null);
   const [recurringEditMode, setRecurringEditMode] = useState<boolean | null>(null); // true = single, false = all
-  const [recurringDialogMode, setRecurringDialogMode] = useState<'edit' | 'delete'>('edit');
+  const [recurringDialogMode, setRecurringDialogMode] = useState<'edit' | 'delete' | 'move'>(
+    'edit'
+  );
+  const [pendingDragMove, setPendingDragMove] = useState<{
+    event: Event;
+    newDate: string;
+  } | null>(null);
 
   const { enqueueSnackbar } = useSnackbar();
 
   const handleRecurringConfirm = async (editSingleOnly: boolean) => {
+    // 이동 모드 처리
+    if (recurringDialogMode === 'move' && pendingDragMove) {
+      await handleRecurringMove(pendingDragMove.event, pendingDragMove.newDate, editSingleOnly);
+      setIsRecurringDialogOpen(false);
+      setPendingDragMove(null);
+      return;
+    }
+
+    // 편집 모드 처리
     if (recurringDialogMode === 'edit' && pendingRecurringEdit) {
       // 편집 모드 저장하고 편집 폼으로 이동
       setRecurringEditMode(editSingleOnly);
       editEvent(pendingRecurringEdit);
       setIsRecurringDialogOpen(false);
       setPendingRecurringEdit(null);
-    } else if (recurringDialogMode === 'delete' && pendingRecurringDelete) {
-      // 반복 일정 삭제 처리
+      return;
+    }
+
+    // 삭제 모드 처리
+    if (recurringDialogMode === 'delete' && pendingRecurringDelete) {
       try {
         await handleRecurringDelete(pendingRecurringDelete, editSingleOnly);
         enqueueSnackbar('일정이 삭제되었습니다', { variant: 'success' });
@@ -194,6 +213,60 @@ function App() {
     } else {
       // Regular event deletion
       deleteEvent(event.id);
+    }
+  };
+
+  const handleRecurringMove = async (
+    draggedEvent: Event,
+    newDate: string,
+    moveSingleOnly: boolean
+  ) => {
+    try {
+      if (moveSingleOnly) {
+        // "예" - 단일 일정만 이동 (반복 속성 제거)
+        const updatedEvent: Event = {
+          ...draggedEvent,
+          date: newDate,
+          repeat: {
+            type: 'none',
+            interval: 0,
+          },
+        };
+        await updateEvent(updatedEvent);
+        enqueueSnackbar('일정이 이동되었습니다', { variant: 'success' });
+      } else {
+        // "아니오" - 시리즈 전체 이동
+        const daysDiff = calculateDaysDiff(draggedEvent.date, newDate);
+        const relatedEvents = findRelatedRecurringEvents(draggedEvent);
+
+        if (relatedEvents.length === 0) {
+          // 연관 일정이 없으면 단일 이동
+          const updatedEvent: Event = { ...draggedEvent, date: newDate };
+          await updateEvent(updatedEvent);
+        } else {
+          // 모든 관련 일정의 날짜 이동
+          const updatedEvents = relatedEvents.map((event) => ({
+            ...event,
+            date: addDays(event.date, daysDiff),
+          }));
+
+          const response = await fetch('/api/events-list', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ events: updatedEvents }),
+          });
+
+          if (!response.ok) {
+            throw new Error('Failed to move recurring events');
+          }
+
+          await fetchEvents();
+        }
+        enqueueSnackbar('반복 일정이 모두 이동되었습니다', { variant: 'success' });
+      }
+    } catch (error) {
+      console.error('일정 이동 실패:', error);
+      enqueueSnackbar('일정 이동에 실패했습니다', { variant: 'error' });
     }
   };
 
@@ -290,6 +363,17 @@ function App() {
 
     // 같은 날짜면 변경 안 함
     if (draggedEvent.date === newDateString) {
+      return;
+    }
+
+    if (isRecurringEvent(draggedEvent)) {
+      // 반복 일정 다이얼로그 표시
+      setPendingDragMove({
+        event: draggedEvent,
+        newDate: newDateString,
+      });
+      setRecurringDialogMode('move');
+      setIsRecurringDialogOpen(true);
       return;
     }
 
