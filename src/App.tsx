@@ -651,7 +651,18 @@ function App() {
             {view === 'week' && renderWeekView()}
             {view === 'month' && renderMonthView()}
           </Stack>
-          <DragOverlay dropAnimation={null}>
+          <DragOverlay
+            dropAnimation={{
+              duration: 200,
+              easing: 'ease-out',
+              keyframes() {
+                return [
+                  { opacity: 1, scaleX: 1, scaleY: 1 },
+                  { opacity: 0, scaleX: 1, scaleY: 1 },
+                ];
+              },
+            }}
+          >
             {activeEvent && (
               <DraggableEvent
                 event={activeEvent}
