@@ -43,19 +43,27 @@ test.describe('알림 시스템', () => {
     await page.getByLabel('설명').fill('긴급 이슈 논의');
     await page.getByLabel('위치').fill('회의실 B');
 
-    // 알림 설정 변경 (1분 전)
     await page.getByTestId('notification-select').click();
     await page.getByRole('option', { name: '1분 전' }).click();
 
     await page.getByTestId('event-submit-button').click();
     await expect(page.getByText('일정이 추가되었습니다').last()).toBeVisible();
 
+    // 폼 초기화 대기
+    await page.waitForTimeout(500);
+
     // 1시간 전 알림
+    await page.getByLabel('제목').clear();
     await page.getByLabel('제목').fill('중요 프레젠테이션');
+    await page.getByLabel('날짜').clear();
     await page.getByLabel('날짜').fill('2025-11-17');
+    await page.getByLabel('시작 시간').clear();
     await page.getByLabel('시작 시간').fill('15:00');
+    await page.getByLabel('종료 시간').clear();
     await page.getByLabel('종료 시간').fill('16:00');
+    await page.getByLabel('설명').clear();
     await page.getByLabel('설명').fill('분기 실적 발표');
+    await page.getByLabel('위치').clear();
     await page.getByLabel('위치').fill('대회의실');
 
     await page.getByTestId('notification-select').click();
@@ -64,12 +72,21 @@ test.describe('알림 시스템', () => {
     await page.getByTestId('event-submit-button').click();
     await expect(page.getByText('일정이 추가되었습니다').last()).toBeVisible();
 
+    // 폼 초기화 대기
+    await page.waitForTimeout(500);
+
     // 1일 전 알림
+    await page.getByLabel('제목').clear();
     await page.getByLabel('제목').fill('연간 행사');
+    await page.getByLabel('날짜').clear();
     await page.getByLabel('날짜').fill('2025-11-20');
+    await page.getByLabel('시작 시간').clear();
     await page.getByLabel('시작 시간').fill('09:00');
+    await page.getByLabel('종료 시간').clear();
     await page.getByLabel('종료 시간').fill('18:00');
+    await page.getByLabel('설명').clear();
     await page.getByLabel('설명').fill('전사 워크샵');
+    await page.getByLabel('위치').clear();
     await page.getByLabel('위치').fill('본사 대강당');
 
     await page.getByTestId('notification-select').click();
@@ -77,6 +94,9 @@ test.describe('알림 시스템', () => {
 
     await page.getByTestId('event-submit-button').click();
     await expect(page.getByText('일정이 추가되었습니다').last()).toBeVisible();
+
+    // 일정 리스트 렌더링 대기
+    await page.waitForTimeout(500);
 
     // 모든 일정의 알림 시간이 올바르게 표시되는지 확인
     const eventList = page.getByTestId('event-list');
