@@ -31,10 +31,7 @@ app.post('/api/reset', async (req, res) => {
     return res.status(403).json({ error: 'Reset is only allowed in E2E test environment' });
   }
 
-  fs.writeFileSync(
-    `${__dirname}/src/__mocks__/response/${dbName}`,
-    JSON.stringify({ events: [] })
-  );
+  fs.writeFileSync(`${__dirname}/src/__mocks__/response/${dbName}`, JSON.stringify({ events: [] }));
 
   res.status(200).json({ message: 'Database reset successfully' });
 });
