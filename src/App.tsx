@@ -684,6 +684,7 @@ function App() {
             <FormLabel htmlFor="notification">알림 설정</FormLabel>
             <Select
               id="notification"
+              data-testid="notification-select"
               size="small"
               value={notificationTime}
               onChange={(e) => setNotificationTime(Number(e.target.value))}
