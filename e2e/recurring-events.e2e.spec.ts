@@ -76,8 +76,9 @@ test.describe('반복 일정 관리', () => {
     await expect(eventList.getByText('특별 스탠드업')).toBeVisible();
 
     // "특별 스탠드업" 일정에 반복 아이콘(Repeat)이 없는지 확인
-    const eventBox = eventList.locator('div:has-text("특별 스탠드업")').first();
-    await expect(eventBox.locator('svg[data-testid="RepeatIcon"]')).not.toBeVisible();
+    // 제목을 포함하는 이벤트 박스를 찾고, 그 안에서 RepeatIcon이 없는지 확인
+    const eventBox = eventList.getByText('특별 스탠드업').locator('..');
+    await expect(eventBox.getByTestId('RepeatIcon')).not.toBeVisible();
   });
 
   test('반복 일정 시리즈 전체 수정 (UPDATE - 시리즈)', async ({ page, createRecurringEvent }) => {

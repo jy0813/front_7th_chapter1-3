@@ -54,6 +54,7 @@ const DraggableEvent = ({
       ref={setNodeRef}
       {...listeners}
       {...attributes}
+      data-testid={`event-${event.id}`}
       sx={{
         ...style, // 드래그 스타일
         ...eventBoxStyles.common, // 공통 스타일
@@ -68,7 +69,7 @@ const DraggableEvent = ({
               event.repeat.endDate ? ` (종료: ${event.repeat.endDate})` : ''
             }`}
           >
-            <Repeat fontSize="small" />
+            <Repeat fontSize="small" data-testid="RepeatIcon" />
           </Tooltip>
         )}
         <Typography variant="caption" noWrap sx={{ fontSize: '0.75rem', lineHeight: 1.2 }}>
