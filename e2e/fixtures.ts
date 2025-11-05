@@ -20,6 +20,8 @@ import { test as base, expect as baseExpect, Page, APIRequestContext } from '@pl
  * });
  */
 
+type RepeatType = 'none' | 'daily' | 'weekly' | 'monthly' | 'yearly';
+
 type EventData = {
   title: string;
   date: string;
@@ -30,9 +32,16 @@ type EventData = {
   category?: string;
 };
 
+type RecurringEventData = EventData & {
+  repeatType: RepeatType;
+  repeatInterval: number;
+  repeatEndDate?: string;
+};
+
 type TestFixtures = {
   page: Page;
   createEvent: (_eventData: EventData) => Promise<void>;
+  createRecurringEvent: (_eventData: RecurringEventData) => Promise<void>;
 };
 
 /**
@@ -76,6 +85,36 @@ export const test = base.extend<TestFixtures>({
     // Playwright API에서 정의된 필수 파라미터명에 충돌 방지
     // eslint-disable-next-line react-hooks/rules-of-hooks
     await use(createEvent);
+  },
+
+  createRecurringEvent: async ({ page }, use) => {
+    const createRecurringEvent = async (eventData: RecurringEventData) => {
+      const defaultData = {
+        description: eventData.description || '',
+        location: eventData.location || '',
+        category: eventData.category || '업무',
+        notificationTime: 10,
+      };
+
+      await page.request.post('http://localhost:3000/api/events', {
+        data: {
+          title: eventData.title,
+          date: eventData.date,
+          startTime: eventData.startTime,
+          endTime: eventData.endTime,
+          ...defaultData,
+          repeat: {
+            type: eventData.repeatType,
+            interval: eventData.repeatInterval,
+            endDate: eventData.repeatEndDate,
+          },
+        },
+      });
+    };
+
+    // Playwright API에서 정의된 필수 파라미터명에 충돌 방지
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    await use(createRecurringEvent);
   },
 });
 

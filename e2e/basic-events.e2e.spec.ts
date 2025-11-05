@@ -1,4 +1,4 @@
-import { test, expect } from '../fixtures';
+import { test, expect } from './fixtures';
 
 /**
  * 기본 일정 관리 CRUD 테스트
