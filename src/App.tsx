@@ -14,11 +14,6 @@ import {
   Box,
   Button,
   Checkbox,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
   FormControl,
   FormControlLabel,
   FormLabel,
@@ -35,6 +30,7 @@ import { useState } from 'react';
 
 import { Calendar } from './components/Calendar/Calendar';
 import DraggableEvent from './components/DraggableEvent.tsx';
+import { OverlapWarningDialog } from './components/OverlapWarningDialog.tsx';
 import RecurringEventDialog from './components/RecurringEventDialog.tsx';
 import { useCalendarView } from './hooks/useCalendarView.ts';
 import { useEventForm } from './hooks/useEventForm.ts';
@@ -728,72 +724,53 @@ function App() {
         </Stack>
       </Stack>
 
-      <Dialog open={isOverlapDialogOpen} onClose={() => setIsOverlapDialogOpen(false)}>
-        <DialogTitle>일정 겹침 경고</DialogTitle>
-        <DialogContent>
-          <DialogContentText>다음 일정과 겹칩니다:</DialogContentText>
-          {overlappingEvents.map((event) => (
-            <Typography key={event.id} sx={{ ml: 1, mb: 1 }}>
-              {event.title} ({event.date} {event.startTime}-{event.endTime})
-            </Typography>
-          ))}
-          <DialogContentText>계속 진행하시겠습니까?</DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button
-            onClick={() => {
-              setIsOverlapDialogOpen(false);
-              setPendingOverlapConfirm(null);
-              setPendingDragMove(null);
-            }}
-          >
-            취소
-          </Button>
-          <Button
-            color="error"
-            onClick={async () => {
-              setIsOverlapDialogOpen(false);
+      <OverlapWarningDialog
+        open={isOverlapDialogOpen}
+        onClose={() => {
+          setIsOverlapDialogOpen(false);
+          setPendingOverlapConfirm(null);
+          setPendingDragMove(null);
+        }}
+        onConfirm={async () => {
+          setIsOverlapDialogOpen(false);
 
-              // 드래그 이동 처리
-              if (pendingOverlapConfirm === 'drag' && pendingDragMove) {
-                const updatedEvent: Event = {
-                  ...pendingDragMove.event,
-                  date: pendingDragMove.newDate,
-                };
-                try {
-                  await updateEvent(updatedEvent);
-                } catch (error) {
-                  console.error('일정 이동 실패:', error);
-                  enqueueSnackbar('일정 이동에 실패했습니다', { variant: 'error' });
-                }
-                setPendingDragMove(null);
-                setPendingOverlapConfirm(null);
-                return;
-              }
+          // 드래그 이동 처리
+          if (pendingOverlapConfirm === 'drag' && pendingDragMove) {
+            const updatedEvent: Event = {
+              ...pendingDragMove.event,
+              date: pendingDragMove.newDate,
+            };
+            try {
+              await updateEvent(updatedEvent);
+            } catch (error) {
+              console.error('일정 이동 실패:', error);
+              enqueueSnackbar('일정 이동에 실패했습니다', { variant: 'error' });
+            }
+            setPendingDragMove(null);
+            setPendingOverlapConfirm(null);
+            return;
+          }
 
-              // 생성/수정 처리
-              saveEvent({
-                id: editingEvent ? editingEvent.id : undefined,
-                title,
-                date,
-                startTime,
-                endTime,
-                description,
-                location,
-                category,
-                repeat: {
-                  type: isRepeating ? repeatType : 'none',
-                  interval: repeatInterval,
-                  endDate: repeatEndDate || undefined,
-                },
-                notificationTime,
-              });
-            }}
-          >
-            계속 진행
-          </Button>
-        </DialogActions>
-      </Dialog>
+          // 생성/수정 처리
+          await saveEvent({
+            id: editingEvent ? editingEvent.id : undefined,
+            title,
+            date,
+            startTime,
+            endTime,
+            description,
+            location,
+            category,
+            repeat: {
+              type: isRepeating ? repeatType : 'none',
+              interval: repeatInterval,
+              endDate: repeatEndDate || undefined,
+            },
+            notificationTime,
+          });
+        }}
+        overlappingEvents={overlappingEvents}
+      />
 
       <RecurringEventDialog
         open={isRecurringDialogOpen}
