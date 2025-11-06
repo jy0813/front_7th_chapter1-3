@@ -7,8 +7,7 @@ import { defineConfig, devices } from '@playwright/test';
 export default defineConfig({
   testDir: './e2e',
 
-  /* 테스트 격리를 위해 순차 실행 (e2e.json 공유로 인한 race condition 방지) */
-  fullyParallel: false,
+  fullyParallel: true,
 
   /* CI 환경에서만 실패 시 재시도 */
   retries: process.env.CI ? 2 : 0,
