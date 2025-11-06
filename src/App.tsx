@@ -1,4 +1,12 @@
-import { DndContext, DragOverlay, DragStartEvent, DragEndEvent } from '@dnd-kit/core';
+import {
+  DndContext,
+  DragOverlay,
+  DragStartEvent,
+  DragEndEvent,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
 import {
   ChevronLeft,
   ChevronRight,
@@ -57,6 +65,15 @@ const getRepeatTypeLabel = (type: RepeatType): string => {
 };
 
 function App() {
+  // 드래그 센서 설정: 2px 이상 움직여야 드래그 시작 (클릭과 드래그 구분)
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 2,
+      },
+    })
+  );
+
   const {
     title,
     setTitle,
@@ -406,7 +423,7 @@ function App() {
           />
         </Box>
 
-        <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+        <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
           <Stack flex={1} spacing={5}>
             <Typography variant="h4">일정 보기</Typography>
 
