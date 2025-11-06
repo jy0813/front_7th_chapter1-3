@@ -1,0 +1,7 @@
+{
+  "projectId": "YOUR_PROJECT_ID",
+  "buildScriptName": "build-storybook",
+  "onlyChanged": true,
+  "externals": ["public/**"],
+  "exitOnceUploaded": true
+}
