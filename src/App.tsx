@@ -135,6 +135,7 @@ function App() {
     event: Event;
     newDate: string;
   } | null>(null);
+  const [pendingOverlapConfirm, setPendingOverlapConfirm] = useState<'drag' | null>(null);
 
   const { enqueueSnackbar } = useSnackbar();
 
@@ -365,6 +366,19 @@ function App() {
       ...draggedEvent,
       date: newDateString,
     };
+
+    // 겹침 체크
+    const overlapping = findOverlappingEvents(updatedEvent, events);
+    if (overlapping.length > 0) {
+      setOverlappingEvents(overlapping);
+      setPendingDragMove({
+        event: draggedEvent,
+        newDate: newDateString,
+      });
+      setPendingOverlapConfirm('drag');
+      setIsOverlapDialogOpen(true);
+      return;
+    }
 
     try {
       await updateEvent(updatedEvent);
@@ -726,11 +740,38 @@ function App() {
           <DialogContentText>계속 진행하시겠습니까?</DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setIsOverlapDialogOpen(false)}>취소</Button>
           <Button
-            color="error"
             onClick={() => {
               setIsOverlapDialogOpen(false);
+              setPendingOverlapConfirm(null);
+              setPendingDragMove(null);
+            }}
+          >
+            취소
+          </Button>
+          <Button
+            color="error"
+            onClick={async () => {
+              setIsOverlapDialogOpen(false);
+
+              // 드래그 이동 처리
+              if (pendingOverlapConfirm === 'drag' && pendingDragMove) {
+                const updatedEvent: Event = {
+                  ...pendingDragMove.event,
+                  date: pendingDragMove.newDate,
+                };
+                try {
+                  await updateEvent(updatedEvent);
+                } catch (error) {
+                  console.error('일정 이동 실패:', error);
+                  enqueueSnackbar('일정 이동에 실패했습니다', { variant: 'error' });
+                }
+                setPendingDragMove(null);
+                setPendingOverlapConfirm(null);
+                return;
+              }
+
+              // 생성/수정 처리
               saveEvent({
                 id: editingEvent ? editingEvent.id : undefined,
                 title,
