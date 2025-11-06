@@ -37,7 +37,7 @@ const createEvent = (overrides: Partial<Event> = {}): Event => ({
 
 const meta: Meta<typeof EventCard> = {
   component: EventCard,
-  title: 'Components/EventCard',
+  title: '일정 상태별 시각적 표현/EventCard',
   tags: ['autodocs'],
   decorators: [
     (Story) => (
@@ -162,6 +162,66 @@ export const NotifiedAndRepeating: Story = {
     docs: {
       description: {
         story: '빨간 배경에 Notifications와 Repeat 아이콘 모두 표시',
+      },
+    },
+  },
+};
+
+export const LongTitle: Story = {
+  name: '긴 제목',
+  args: {
+    event: createEvent({
+      title: '2025년 4분기 전사 경영전략 회의 및 실적 분석 보고회',
+    }),
+    isNotified: false,
+    isRepeating: false,
+    getRepeatTypeLabel,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: '긴 제목이 noWrap 속성으로 "..." 처리되는지 검증',
+      },
+    },
+  },
+};
+
+export const VeryLongTitle: Story = {
+  name: '매우 긴 제목',
+  args: {
+    event: createEvent({
+      title:
+        '제1회 글로벌 디지털 트랜스포메이션 추진위원회 정기 회의 및 분기별 실적 점검 보고회 (본사 대강당, 참석 필수)',
+    }),
+    isNotified: false,
+    isRepeating: false,
+    getRepeatTypeLabel,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: '100자 이상의 극단적으로 긴 제목 처리 검증',
+      },
+    },
+  },
+};
+
+export const LongTitleWithAllIcons: Story = {
+  name: '긴 제목 + 모든 아이콘',
+  args: {
+    event: createEvent({
+      title: '2025년 4분기 전사 경영전략 회의 및 실적 분석 보고회',
+      repeat: { type: 'weekly', interval: 1, id: 'repeat-5' },
+      notificationTime: 10,
+    }),
+    isNotified: true,
+    isRepeating: true,
+    getRepeatTypeLabel,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: '긴 제목과 알림, 반복 아이콘이 모두 표시될 때 레이아웃 검증',
       },
     },
   },

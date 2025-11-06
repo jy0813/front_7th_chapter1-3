@@ -314,7 +314,7 @@ const monthHolidays = {
 
 const meta: Meta<typeof Calendar> = {
   component: Calendar,
-  title: 'Calendar/Calendar',
+  title: '타입에 따른 캘린더 뷰 렌더링/Calendar',
   tags: ['autodocs'],
   decorators: [
     (Story) => (

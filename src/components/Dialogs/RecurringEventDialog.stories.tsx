@@ -4,7 +4,7 @@ import { fn } from 'storybook/test';
 import RecurringEventDialog from './RecurringEventDialog';
 
 const meta = {
-  title: 'Components/RecurringEventDialog',
+  title: '다이얼로그 및 모달/RecurringEventDialog',
   component: RecurringEventDialog,
   parameters: {
     layout: 'centered',

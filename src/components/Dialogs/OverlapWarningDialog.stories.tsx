@@ -4,7 +4,7 @@ import { fn } from 'storybook/test';
 import { OverlapWarningDialog } from './OverlapWarningDialog';
 
 const meta = {
-  title: 'Components/OverlapWarningDialog',
+  title: '다이얼로그 및 모달/OverlapWarningDialog',
   component: OverlapWarningDialog,
   parameters: {
     layout: 'centered',

@@ -4,7 +4,7 @@ import { fn } from 'storybook/test';
 import { EventForm } from './EventForm';
 
 const meta = {
-  title: 'Components/EventForm',
+  title: '폼 컨트롤 상태/EventForm',
   component: EventForm,
   parameters: {
     layout: 'padded',
