@@ -2,7 +2,7 @@ import { Box } from '@mui/material';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import EventCard from './EventCard';
-import { Event } from '../types';
+import { Event } from '../../types';
 
 // 공통 헬퍼 함수
 const getRepeatTypeLabel = (type: string) => {

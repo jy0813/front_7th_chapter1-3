@@ -9,10 +9,10 @@ import {
   TableContainer,
 } from '@mui/material';
 
+import DraggableEvent from './DraggableEvent';
+import DroppableCell from './DroppableCell';
 import { Event, RepeatType } from '../../types';
 import { formatMonth, getWeeksAtMonth, formatDate, getEventsForDay } from '../../utils/dateUtils';
-import DraggableEvent from '../DraggableEvent';
-import DroppableCell from '../DroppableCell';
 
 export interface MonthViewProps {
   currentDate: Date;

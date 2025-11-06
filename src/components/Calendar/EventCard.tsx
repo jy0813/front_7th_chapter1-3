@@ -2,7 +2,7 @@ import { Notifications, Repeat } from '@mui/icons-material';
 import { Box, Stack, Tooltip, Typography } from '@mui/material';
 import { forwardRef, CSSProperties } from 'react';
 
-import { Event, RepeatType } from '../types';
+import { Event, RepeatType } from '../../types';
 
 interface EventCardProps {
   event: Event;

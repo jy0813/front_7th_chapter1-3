@@ -13,9 +13,9 @@ import {
 } from '@mui/material';
 import { ChangeEvent } from 'react';
 
-import { categories, notificationOptions } from '../constants/formOptions';
-import { Event, RepeatType } from '../types';
-import { getTimeErrorMessage } from '../utils/timeValidation';
+import { categories, notificationOptions } from '../../constants/formOptions';
+import { Event, RepeatType } from '../../types';
+import { getTimeErrorMessage } from '../../utils/timeValidation';
 
 export interface EventFormProps {
   // 폼 값들

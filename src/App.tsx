@@ -26,10 +26,10 @@ import { useSnackbar } from 'notistack';
 import { useState } from 'react';
 
 import { Calendar } from './components/Calendar/Calendar';
-import DraggableEvent from './components/DraggableEvent.tsx';
-import { EventForm } from './components/EventForm.tsx';
-import { OverlapWarningDialog } from './components/OverlapWarningDialog.tsx';
-import RecurringEventDialog from './components/RecurringEventDialog.tsx';
+import DraggableEvent from './components/Calendar/DraggableEvent.tsx';
+import { OverlapWarningDialog } from './components/Dialogs/OverlapWarningDialog.tsx';
+import RecurringEventDialog from './components/Dialogs/RecurringEventDialog.tsx';
+import { EventForm } from './components/EventForm/EventForm.tsx';
 import { notificationOptions } from './constants/formOptions';
 import { useCalendarView } from './hooks/useCalendarView.ts';
 import { useEventForm } from './hooks/useEventForm.ts';

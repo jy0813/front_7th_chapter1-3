@@ -1,7 +1,7 @@
 import { useDraggable } from '@dnd-kit/core';
 
-import { Event, RepeatType } from '../types';
 import EventCard from './EventCard';
+import { Event, RepeatType } from '../../types';
 
 interface DraggableEventProps {
   event: Event;
