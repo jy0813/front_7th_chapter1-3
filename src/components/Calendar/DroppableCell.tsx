@@ -17,6 +17,7 @@ const DroppableCell = ({ dateString, day, holiday, onClick, children }: Droppabl
     <TableCell
       ref={setNodeRef}
       onClick={onClick}
+      data-testid={dateString ? `date-cell-${dateString}` : undefined}
       sx={{
         height: '120px',
         verticalAlign: 'top',
