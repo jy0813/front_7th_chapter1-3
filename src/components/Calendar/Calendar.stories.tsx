@@ -312,8 +312,6 @@ const monthHolidays = {
   '2025-11-15': '광복절',
 };
 
-// ==================== Storybook Meta ====================
-
 const meta: Meta<typeof Calendar> = {
   component: Calendar,
   title: 'Calendar/Calendar',
@@ -350,9 +348,8 @@ const meta: Meta<typeof Calendar> = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-// ==================== Week View Stories ====================
-
 export const Week_Empty: Story = {
+  name: '주간 뷰 - 빈 캘린더',
   args: {
     view: 'week',
     currentDate: new Date('2025-11-06'),
@@ -364,13 +361,14 @@ export const Week_Empty: Story = {
   parameters: {
     docs: {
       description: {
-        story: '[주간 뷰] 일정이 없는 빈 캘린더입니다.',
+        story: '일정이 없는 빈 주간 캘린더',
       },
     },
   },
 };
 
 export const Week_WithEvents: Story = {
+  name: '주간 뷰 - 일정 있음',
   args: {
     view: 'week',
     currentDate: new Date('2025-11-06'),
@@ -382,13 +380,14 @@ export const Week_WithEvents: Story = {
   parameters: {
     docs: {
       description: {
-        story: '[주간 뷰] 다양한 카테고리의 일정이 포함되어 있습니다.',
+        story: '다양한 카테고리의 일정이 포함된 주간 캘린더',
       },
     },
   },
 };
 
 export const Week_WithNotifications: Story = {
+  name: '주간 뷰 - 알림',
   args: {
     view: 'week',
     currentDate: new Date('2025-11-06'),
@@ -400,13 +399,14 @@ export const Week_WithNotifications: Story = {
   parameters: {
     docs: {
       description: {
-        story: '[주간 뷰] 알림이 활성화된 일정들이 포함되어 있습니다.',
+        story: '알림이 활성화된 일정들이 포함된 주간 캘린더',
       },
     },
   },
 };
 
 export const Week_WithRepeatingEvents: Story = {
+  name: '주간 뷰 - 반복 일정',
   args: {
     view: 'week',
     currentDate: new Date('2025-11-06'),
@@ -418,13 +418,14 @@ export const Week_WithRepeatingEvents: Story = {
   parameters: {
     docs: {
       description: {
-        story: '[주간 뷰] 매일 반복되는 조깅 일정과 매주 반복되는 회의가 포함되어 있습니다.',
+        story: '매일/매주 반복되는 일정이 포함된 주간 캘린더',
       },
     },
   },
 };
 
 export const Week_WithOverlappingEvents: Story = {
+  name: '주간 뷰 - 겹치는 일정',
   args: {
     view: 'week',
     currentDate: new Date('2025-11-06'),
@@ -436,13 +437,14 @@ export const Week_WithOverlappingEvents: Story = {
   parameters: {
     docs: {
       description: {
-        story: '[주간 뷰] 시간이 겹치는 일정들이 포함되어 있습니다.',
+        story: '시간이 겹치는 일정들이 포함된 주간 캘린더',
       },
     },
   },
 };
 
 export const Week_WithHolidays: Story = {
+  name: '주간 뷰 - 공휴일',
   args: {
     view: 'week',
     currentDate: new Date('2025-11-06'),
@@ -454,15 +456,14 @@ export const Week_WithHolidays: Story = {
   parameters: {
     docs: {
       description: {
-        story: '[주간 뷰] 공휴일이 포함되어 있습니다.',
+        story: '공휴일이 포함된 주간 캘린더',
       },
     },
   },
 };
 
-// ==================== Month View Stories ====================
-
 export const Month_Empty: Story = {
+  name: '월간 뷰 - 빈 캘린더',
   args: {
     view: 'month',
     currentDate: new Date('2025-11-06'),
@@ -474,13 +475,14 @@ export const Month_Empty: Story = {
   parameters: {
     docs: {
       description: {
-        story: '[월간 뷰] 일정이 없는 빈 캘린더입니다.',
+        story: '일정이 없는 빈 월간 캘린더',
       },
     },
   },
 };
 
 export const Month_WithEvents: Story = {
+  name: '월간 뷰 - 일정 있음',
   args: {
     view: 'month',
     currentDate: new Date('2025-11-06'),
@@ -492,13 +494,14 @@ export const Month_WithEvents: Story = {
   parameters: {
     docs: {
       description: {
-        story: '[월간 뷰] 다양한 카테고리의 일정이 포함되어 있습니다.',
+        story: '다양한 카테고리의 일정이 포함된 월간 캘린더',
       },
     },
   },
 };
 
 export const Month_WithNotifications: Story = {
+  name: '월간 뷰 - 알림',
   args: {
     view: 'month',
     currentDate: new Date('2025-11-06'),
@@ -510,13 +513,14 @@ export const Month_WithNotifications: Story = {
   parameters: {
     docs: {
       description: {
-        story: '[월간 뷰] 알림이 활성화된 일정들이 포함되어 있습니다.',
+        story: '알림이 활성화된 일정들이 포함된 월간 캘린더',
       },
     },
   },
 };
 
 export const Month_WithRepeatingEvents: Story = {
+  name: '월간 뷰 - 반복 일정',
   args: {
     view: 'month',
     currentDate: new Date('2025-11-06'),
@@ -528,13 +532,14 @@ export const Month_WithRepeatingEvents: Story = {
   parameters: {
     docs: {
       description: {
-        story: '[월간 뷰] 매일 반복되는 조깅 일정과 매주 반복되는 회의가 포함되어 있습니다.',
+        story: '매일/매주 반복되는 일정이 포함된 월간 캘린더',
       },
     },
   },
 };
 
 export const Month_WithOverlappingEvents: Story = {
+  name: '월간 뷰 - 겹치는 일정',
   args: {
     view: 'month',
     currentDate: new Date('2025-11-06'),
@@ -546,13 +551,14 @@ export const Month_WithOverlappingEvents: Story = {
   parameters: {
     docs: {
       description: {
-        story: '[월간 뷰] 시간이 겹치는 일정들이 포함되어 있습니다.',
+        story: '시간이 겹치는 일정들이 포함된 월간 캘린더',
       },
     },
   },
 };
 
 export const Month_WithHolidays: Story = {
+  name: '월간 뷰 - 공휴일',
   args: {
     view: 'month',
     currentDate: new Date('2025-11-06'),
@@ -564,7 +570,7 @@ export const Month_WithHolidays: Story = {
   parameters: {
     docs: {
       description: {
-        story: '[월간 뷰] 공휴일이 포함되어 있습니다.',
+        story: '공휴일이 포함된 월간 캘린더',
       },
     },
   },
