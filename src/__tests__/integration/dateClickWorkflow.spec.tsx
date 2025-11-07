@@ -147,4 +147,56 @@ describe('날짜 클릭 워크플로우', () => {
     const dateInput4 = screen.getByLabelText('날짜') as HTMLInputElement;
     expect(dateInput4.value).toBe('2025-10-10');
   });
+
+  it('이미 일부 정보를 입력한 상태에서 날짜 셀을 클릭하면 날짜만 변경되고 다른 필드는 유지된다', async () => {
+    const { user } = setup();
+
+    // 1. 먼저 일부 정보 입력 (날짜 제외)
+    await user.type(screen.getByLabelText('제목'), '부분 입력 테스트');
+    await user.type(screen.getByLabelText('시작 시간'), '09:00');
+    await user.type(screen.getByLabelText('종료 시간'), '10:00');
+    await user.type(screen.getByLabelText('설명'), '날짜만 변경 테스트');
+    await user.type(screen.getByLabelText('위치'), '회의실 B');
+
+    // 2. 입력한 값들 저장
+    const titleInput = screen.getByLabelText('제목') as HTMLInputElement;
+    const startTimeInput = screen.getByLabelText('시작 시간') as HTMLInputElement;
+    const endTimeInput = screen.getByLabelText('종료 시간') as HTMLInputElement;
+    const descriptionInput = screen.getByLabelText('설명') as HTMLInputElement;
+    const locationInput = screen.getByLabelText('위치') as HTMLInputElement;
+
+    const originalTitle = titleInput.value;
+    const originalStartTime = startTimeInput.value;
+    const originalEndTime = endTimeInput.value;
+    const originalDescription = descriptionInput.value;
+    const originalLocation = locationInput.value;
+
+    // 3. 날짜 셀 클릭
+    const dateCell = screen.getByTestId('date-cell-2025-10-18');
+    await user.click(dateCell);
+
+    // 4. 날짜만 변경되었는지 확인
+    const dateInput = screen.getByLabelText('날짜') as HTMLInputElement;
+    expect(dateInput.value).toBe('2025-10-18');
+
+    // 5. 다른 필드들은 그대로 유지되는지 확인
+    expect(titleInput.value).toBe(originalTitle);
+    expect(startTimeInput.value).toBe(originalStartTime);
+    expect(endTimeInput.value).toBe(originalEndTime);
+    expect(descriptionInput.value).toBe(originalDescription);
+    expect(locationInput.value).toBe(originalLocation);
+
+    // 6. 다른 날짜 셀을 클릭해도 여전히 다른 필드는 유지
+    const anotherDateCell = screen.getByTestId('date-cell-2025-10-22');
+    await user.click(anotherDateCell);
+
+    const dateInputAfter = screen.getByLabelText('날짜') as HTMLInputElement;
+    expect(dateInputAfter.value).toBe('2025-10-22');
+
+    expect(titleInput.value).toBe(originalTitle);
+    expect(startTimeInput.value).toBe(originalStartTime);
+    expect(endTimeInput.value).toBe(originalEndTime);
+    expect(descriptionInput.value).toBe(originalDescription);
+    expect(locationInput.value).toBe(originalLocation);
+  });
 });
