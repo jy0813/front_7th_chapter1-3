@@ -3,15 +3,18 @@ import { test, expect } from './fixtures';
 /**
  * 반복 일정 관리 워크플로우 테스트
  *
- * 반복 일정의 핵심 기능만 테스트:
+ * 반복 일정의 핵심 E2E 기능 테스트:
  * - CREATE: 반복 일정 생성
  * - UPDATE (단일): 반복 시리즈 중 하나만 수정
  * - UPDATE (시리즈): 반복 시리즈 전체 수정
  * - DELETE (단일): 반복 시리즈 중 하나만 삭제
  * - DELETE (시리즈): 반복 시리즈 전체 삭제
+ *
+ * 참고: 반복 일정 설정 검증 테스트는 통합 테스트로 이동됨
+ * (__tests__/integration/recurringEventWorkflow.spec.tsx)
  */
 
-test.describe('반복 일정 관리', () => {
+test.describe('반복 일정 관리 CRUD', () => {
   test('반복 일정 생성 (CREATE)', async ({ page }) => {
     // 반복 일정 활성화
     await page.getByRole('checkbox', { name: '반복 일정' }).click();
@@ -169,5 +172,82 @@ test.describe('반복 일정 관리', () => {
 
     // 삭제 성공 확인 - 모든 반복 일정이 삭제됨
     await expect(page.getByTestId('event-list').getByText('삭제할 반복 일정')).not.toBeVisible();
+  });
+});
+
+test.describe('반복 일정 설정 검증 워크플로우', () => {
+  test('격주 반복 일정 생성 → 목록에서 반복 확인', async ({ page }) => {
+    // 1. 격주 반복 일정 생성
+    await page.getByRole('checkbox', { name: '반복 일정' }).click();
+
+    await page.getByLabel('제목').fill('격주 팀 회의');
+    await page.getByLabel('날짜').fill('2025-11-10');
+    await page.getByLabel('시작 시간').fill('10:00');
+    await page.getByLabel('종료 시간').fill('11:00');
+    await page.getByLabel('설명').fill('2주마다 진행되는 팀 회의');
+    await page.getByLabel('위치').fill('회의실 A');
+
+    // 반복 설정 (2주마다)
+    await page.getByLabel('반복 유형').click();
+    await page.getByText('매주').click();
+
+    await page.getByLabel('반복 간격').fill('2'); // 핵심: 2주마다
+    await page.getByLabel('반복 종료일').fill('2025-12-31');
+
+    await page.getByTestId('event-submit-button').click();
+
+    // 2. 성공 확인
+    await expect(page.getByText('일정이 추가되었습니다')).toBeVisible();
+
+    // 3. 목록에서 반복 일정 생성 확인
+    const eventList = page.getByTestId('event-list');
+    const events = eventList.getByText('격주 팀 회의');
+    await expect(events.first()).toBeVisible();
+
+    // 4. 반복 아이콘 확인 (반복 일정임을 시각적으로 확인)
+    await expect(eventList.getByTestId('RepeatIcon').first()).toBeVisible();
+
+    // 5. 첫 번째 일정 클릭해서 상세 정보 확인
+    await events.first().click();
+
+    // 6. 편집 버튼으로 반복 설정 확인
+    await page
+      .getByRole('button', { name: /Edit event/i })
+      .first()
+      .click();
+
+    // 7. 반복 일정 다이얼로그가 나타나는지 확인 (반복 일정임을 재확인)
+    await expect(page.getByText('반복 일정 수정')).toBeVisible();
+    await expect(page.getByText('해당 일정만 수정하시겠어요?')).toBeVisible();
+  });
+
+  test('무한 반복 일정 생성 → 종료일 없음 확인', async ({ page }) => {
+    // 1. 무한 반복 일정 생성
+    await page.getByRole('checkbox', { name: '반복 일정' }).click();
+
+    await page.getByLabel('제목').fill('매일 아침 회의');
+    await page.getByLabel('날짜').fill('2025-11-10');
+    await page.getByLabel('시작 시간').fill('09:00');
+    await page.getByLabel('종료 시간').fill('09:30');
+    await page.getByLabel('설명').fill('매일 진행되는 아침 회의');
+    await page.getByLabel('위치').fill('회의실 B');
+
+    await page.getByLabel('반복 유형').click();
+    await page.getByRole('option', { name: 'daily-option' }).click();
+
+    await page.getByLabel('반복 간격').fill('1');
+    // 반복 종료일은 입력하지 않음 (무한 반복)
+
+    await page.getByTestId('event-submit-button').click();
+
+    // 2. 성공 확인
+    await expect(page.getByText('일정이 추가되었습니다')).toBeVisible();
+
+    // 3. 목록에서 확인
+    const eventList = page.getByTestId('event-list');
+    await expect(eventList.getByText('매일 아침 회의').first()).toBeVisible();
+
+    // 4. 반복 아이콘 확인 (무한 반복 일정 성공적으로 생성됨)
+    await expect(eventList.getByTestId('RepeatIcon').first()).toBeVisible();
   });
 });

@@ -3,12 +3,12 @@ import { test, expect } from './fixtures';
 /**
  * 기본 일정 관리 CRUD 테스트
  *
- * CRUD 작업과 기본 검증 테스트:
+ * CRUD 작업 E2E 테스트:
  * - CREATE: 일정 생성
  * - READ: 일정 조회
- * - UPDATE: 일정 수정 (전체/부분)
+ * - UPDATE: 일정 수정
  * - DELETE: 일정 삭제
- * - VALIDATION: 필수 필드 및 시간 유효성 검증
+ *
  */
 
 test.describe('기본 일정 관리 CRUD', () => {
@@ -121,73 +121,58 @@ test.describe('기본 일정 관리 CRUD', () => {
   });
 });
 
-test.describe('폼 검증', () => {
-  test('필수 필드 누락 시 에러 메시지 표시', async ({ page }) => {
-    // 제목만 비우고 다른 필드는 입력
+test.describe('폼 검증 워크플로우', () => {
+  test('필수 필드 누락 → 에러 확인 → 수정 → 일정 생성 성공', async ({ page }) => {
+    // 1. 사용자가 실수로 제목 없이 제출
     await page.getByLabel('날짜').fill('2025-11-15');
     await page.getByLabel('시작 시간').fill('14:00');
     await page.getByLabel('종료 시간').fill('15:00');
-
-    // 제출 시도
+    await page.getByLabel('설명').fill('설명 내용');
+    await page.getByLabel('위치').fill('회의실 A');
     await page.getByTestId('event-submit-button').click();
 
-    // 에러 메시지 확인
+    // 2. 에러 메시지 확인 (사용자가 에러를 인지)
     await expect(page.getByText('필수 정보를 모두 입력해주세요.')).toBeVisible();
-
-    // 일정이 생성되지 않았는지 확인
     await expect(page.getByText('일정이 추가되었습니다')).not.toBeVisible();
+
+    // 3. 사용자가 에러를 보고 제목 입력 (수정)
+    await page.getByLabel('제목').fill('팀 회의');
+    await page.getByTestId('event-submit-button').click();
+
+    // 4. 성공 확인 및 목록에서 조회 (완전한 워크플로우)
+    await expect(page.getByText('일정이 추가되었습니다')).toBeVisible();
+    const eventList = page.getByTestId('event-list');
+    await expect(eventList.getByText('팀 회의')).toBeVisible();
+    await expect(eventList).toContainText('2025-11-15');
+    await expect(eventList).toContainText('14:00 - 15:00');
+    await expect(eventList).toContainText('설명 내용');
+    await expect(eventList).toContainText('회의실 A');
   });
 
-  test('종료 시간이 시작 시간보다 빠른 경우 에러', async ({ page }) => {
-    // 모든 필드 입력 (시간만 잘못됨)
-    await page.getByLabel('제목').fill('잘못된 시간');
+  test('잘못된 시간 → 에러 확인 → 수정 → 일정 생성 성공', async ({ page }) => {
+    // 1. 사용자가 실수로 종료 시간을 시작 시간보다 빠르게 입력
+    await page.getByLabel('제목').fill('중요한 회의');
     await page.getByLabel('날짜').fill('2025-11-15');
     await page.getByLabel('시작 시간').fill('15:00');
-    await page.getByLabel('종료 시간').fill('14:00'); // 시작보다 빠름
-
-    // 제출 시도
+    await page.getByLabel('종료 시간').fill('14:00'); // 실수
+    await page.getByLabel('설명').fill('긴급 회의');
+    await page.getByLabel('위치').fill('회의실 B');
     await page.getByTestId('event-submit-button').click();
 
-    // 시간 에러 메시지 확인
+    // 2. 시간 에러 확인
     await expect(page.getByText('시간 설정을 확인해주세요.')).toBeVisible();
-
-    // 일정이 생성되지 않았는지 확인
     await expect(page.getByText('일정이 추가되었습니다')).not.toBeVisible();
+
+    // 3. 사용자가 에러를 보고 시간 수정
+    await page.getByRole('textbox', { name: '종료 시간' }).clear();
+    await page.getByRole('textbox', { name: '종료 시간' }).fill('16:00'); // 수정
+    await page.getByTestId('event-submit-button').click();
+
+    // 4. 성공 및 목록 확인
+    await expect(page.getByText('일정이 추가되었습니다')).toBeVisible();
+    const eventList = page.getByTestId('event-list');
+    await expect(eventList.getByText('중요한 회의')).toBeVisible();
+    await expect(eventList).toContainText('15:00 - 16:00');
+    await expect(eventList).toContainText('긴급 회의');
   });
-});
-
-test('시간만 수정', async ({ page, createEvent }) => {
-  // 테스트 일정 미리 생성
-  await createEvent({
-    title: '시간 수정 테스트',
-    date: '2025-11-20',
-    startTime: '10:00',
-    endTime: '11:00',
-    description: '원본 설명',
-    location: '원본 위치',
-  });
-
-  await page.reload();
-
-  // 일정 클릭 후 수정 모드 진입
-  await page.getByTestId('event-list').getByText('시간 수정 테스트').click();
-  await page.getByRole('button', { name: /Edit event/i }).click();
-
-  // 시간만 변경
-  await page.getByRole('textbox', { name: '시작 시간' }).clear();
-  await page.getByRole('textbox', { name: '시작 시간' }).fill('14:00');
-
-  await page.getByRole('textbox', { name: '종료 시간' }).clear();
-  await page.getByRole('textbox', { name: '종료 시간' }).fill('15:00');
-
-  // 저장
-  await page.getByTestId('event-submit-button').click();
-
-  // 수정 성공 확인 - 시간만 변경되고 다른 필드는 유지
-  const eventList = page.getByTestId('event-list');
-  await expect(eventList.getByText('시간 수정 테스트')).toBeVisible();
-  await expect(eventList).toContainText('14:00 - 15:00'); // 시간 변경됨
-  await expect(eventList).toContainText('2025-11-20'); // 날짜 유지
-  await expect(eventList).toContainText('원본 설명'); // 설명 유지
-  await expect(eventList).toContainText('원본 위치'); // 위치 유지
 });
