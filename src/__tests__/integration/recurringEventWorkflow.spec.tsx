@@ -10,6 +10,7 @@ import {
   setupMockHandlerRecurringListDelete,
   setupMockHandlerRecurringListUpdate,
   setupMockHandlerUpdating,
+  setupMockHandlerListCreation,
 } from '../../__mocks__/handlersUtils';
 import App from '../../App';
 
@@ -384,6 +385,116 @@ describe('반복 일정 워크플로우 통합 테스트', () => {
       // 모든 일정이 그대로 남아있는지 확인
       const unchangedEventList = within(screen.getByTestId('event-list'));
       expect(unchangedEventList.getAllByText('매일 회의')).toHaveLength(2);
+    });
+  });
+
+  describe('반복 일정 설정 검증 (P2 테스트)', () => {
+    it('반복 간격 설정이 올바르게 동작한다', async () => {
+      setupMockHandlerListCreation();
+
+      const { user } = setup(<App />);
+      await screen.findByText('일정 로딩 완료!');
+
+      // 반복 일정 체크박스 활성화
+      const repeatCheckbox = screen.getByRole('checkbox', { name: '반복 일정' });
+      await user.click(repeatCheckbox);
+
+      // 기본 일정 정보 입력
+      const titleInput = screen.getByLabelText('제목');
+      await user.type(titleInput, '격주 회의');
+
+      const dateInput = screen.getByLabelText('날짜');
+      await user.type(dateInput, '2025-10-10');
+
+      const startTimeInput = screen.getByLabelText('시작 시간');
+      await user.type(startTimeInput, '10:00');
+
+      const endTimeInput = screen.getByLabelText('종료 시간');
+      await user.type(endTimeInput, '11:00');
+
+      const descriptionInput = screen.getByLabelText('설명');
+      await user.type(descriptionInput, '2주마다 반복');
+
+      const locationInput = screen.getByLabelText('위치');
+      await user.type(locationInput, '회의실 A');
+
+      // 반복 유형 선택 (매주)
+      await user.click(within(screen.getByLabelText('반복 유형')).getByRole('combobox'));
+      await user.click(screen.getByRole('option', { name: 'weekly-option' }));
+
+      // 반복 간격 설정 (2주마다)
+      const intervalInput = screen.getByLabelText('반복 간격');
+      await user.clear(intervalInput);
+      await user.type(intervalInput, '2');
+
+      // 반복 종료일 설정
+      const endDateInput = screen.getByLabelText('반복 종료일');
+      await user.type(endDateInput, '2025-12-31');
+
+      // 일정 추가
+      const submitButton = screen.getByTestId('event-submit-button');
+      await user.click(submitButton);
+
+      // 성공 메시지 확인
+      await screen.findByText('일정이 추가되었습니다');
+
+      // 격주 반복 일정이 목록에 표시되는지 확인
+      const eventList = within(screen.getByTestId('event-list'));
+      const events = eventList.getAllByText('격주 회의');
+      expect(events.length).toBeGreaterThan(0); // 최소 1개 이상의 반복 일정이 생성됨
+    });
+
+    it('반복 종료일 없이 무한 반복 일정 생성이 가능하다', async () => {
+      setupMockHandlerListCreation();
+
+      const { user } = setup(<App />);
+      await screen.findByText('일정 로딩 완료!');
+
+      // 반복 일정 체크박스 활성화
+      const repeatCheckbox = screen.getByRole('checkbox', { name: '반복 일정' });
+      await user.click(repeatCheckbox);
+
+      // 기본 일정 정보 입력
+      const titleInput = screen.getByLabelText('제목');
+      await user.type(titleInput, '무한 반복 일정');
+
+      const dateInput = screen.getByLabelText('날짜');
+      await user.type(dateInput, '2025-10-10');
+
+      const startTimeInput = screen.getByLabelText('시작 시간');
+      await user.type(startTimeInput, '10:00');
+
+      const endTimeInput = screen.getByLabelText('종료 시간');
+      await user.type(endTimeInput, '11:00');
+
+      const descriptionInput = screen.getByLabelText('설명');
+      await user.type(descriptionInput, '종료일 없는 반복');
+
+      const locationInput = screen.getByLabelText('위치');
+      await user.type(locationInput, '회의실 B');
+
+      // 반복 유형 선택 (매주)
+      await user.click(within(screen.getByLabelText('반복 유형')).getByRole('combobox'));
+      await user.click(screen.getByRole('option', { name: 'weekly-option' }));
+
+      // 반복 간격 설정 (1주마다)
+      const intervalInput = screen.getByLabelText('반복 간격');
+      await user.clear(intervalInput);
+      await user.type(intervalInput, '1');
+
+      // 반복 종료일은 입력하지 않음 (무한 반복)
+
+      // 일정 추가
+      const submitButton = screen.getByTestId('event-submit-button');
+      await user.click(submitButton);
+
+      // 성공 메시지 확인
+      await screen.findByText('일정이 추가되었습니다');
+
+      // 무한 반복 일정이 목록에 표시되는지 확인
+      const eventList = within(screen.getByTestId('event-list'));
+      const events = eventList.getAllByText('무한 반복 일정');
+      expect(events.length).toBeGreaterThan(0);
     });
   });
 });
