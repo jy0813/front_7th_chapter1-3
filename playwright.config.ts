@@ -7,7 +7,8 @@ import { defineConfig, devices } from '@playwright/test';
 export default defineConfig({
   testDir: './e2e',
 
-  fullyParallel: true,
+  // 단일 워커를 실행하는데...true가 의미가 있을까..?
+  fullyParallel: false,
 
   /* CI 환경에서만 실패 시 재시도 */
   retries: process.env.CI ? 2 : 0,
