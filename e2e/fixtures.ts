@@ -48,6 +48,12 @@ type TestFixtures = {
  * DB를 초기화하고 페이지를 로드하는 헬퍼 함수
  */
 async function setupTest(page: Page, request: APIRequestContext): Promise<void> {
+  // 시간을 2025-11-06 00:00:00 UTC로 고정
+  // 모든 E2E 테스트가 동일한 "오늘" 기준으로 실행됨
+  await page.clock.install({
+    time: new Date('2025-11-06T00:00:00Z'),
+  });
+
   await request.post('http://localhost:3000/api/reset');
   await page.goto('/');
 }
