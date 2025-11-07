@@ -121,37 +121,39 @@ test.describe('기본 일정 관리 CRUD', () => {
   });
 });
 
-test('필수 필드 누락 시 에러 메시지 표시', async ({ page }) => {
-  // 제목만 비우고 다른 필드는 입력
-  await page.getByLabel('날짜').fill('2025-11-15');
-  await page.getByLabel('시작 시간').fill('14:00');
-  await page.getByLabel('종료 시간').fill('15:00');
+test.describe('폼 검증', () => {
+  test('필수 필드 누락 시 에러 메시지 표시', async ({ page }) => {
+    // 제목만 비우고 다른 필드는 입력
+    await page.getByLabel('날짜').fill('2025-11-15');
+    await page.getByLabel('시작 시간').fill('14:00');
+    await page.getByLabel('종료 시간').fill('15:00');
 
-  // 제출 시도
-  await page.getByTestId('event-submit-button').click();
+    // 제출 시도
+    await page.getByTestId('event-submit-button').click();
 
-  // 에러 메시지 확인
-  await expect(page.getByText('필수 정보를 모두 입력해주세요.')).toBeVisible();
+    // 에러 메시지 확인
+    await expect(page.getByText('필수 정보를 모두 입력해주세요.')).toBeVisible();
 
-  // 일정이 생성되지 않았는지 확인
-  await expect(page.getByText('일정이 추가되었습니다')).not.toBeVisible();
-});
+    // 일정이 생성되지 않았는지 확인
+    await expect(page.getByText('일정이 추가되었습니다')).not.toBeVisible();
+  });
 
-test('종료 시간이 시작 시간보다 빠른 경우 에러', async ({ page }) => {
-  // 모든 필드 입력 (시간만 잘못됨)
-  await page.getByLabel('제목').fill('잘못된 시간');
-  await page.getByLabel('날짜').fill('2025-11-15');
-  await page.getByLabel('시작 시간').fill('15:00');
-  await page.getByLabel('종료 시간').fill('14:00'); // 시작보다 빠름
+  test('종료 시간이 시작 시간보다 빠른 경우 에러', async ({ page }) => {
+    // 모든 필드 입력 (시간만 잘못됨)
+    await page.getByLabel('제목').fill('잘못된 시간');
+    await page.getByLabel('날짜').fill('2025-11-15');
+    await page.getByLabel('시작 시간').fill('15:00');
+    await page.getByLabel('종료 시간').fill('14:00'); // 시작보다 빠름
 
-  // 제출 시도
-  await page.getByTestId('event-submit-button').click();
+    // 제출 시도
+    await page.getByTestId('event-submit-button').click();
 
-  // 시간 에러 메시지 확인
-  await expect(page.getByText('시간 설정을 확인해주세요.')).toBeVisible();
+    // 시간 에러 메시지 확인
+    await expect(page.getByText('시간 설정을 확인해주세요.')).toBeVisible();
 
-  // 일정이 생성되지 않았는지 확인
-  await expect(page.getByText('일정이 추가되었습니다')).not.toBeVisible();
+    // 일정이 생성되지 않았는지 확인
+    await expect(page.getByText('일정이 추가되었습니다')).not.toBeVisible();
+  });
 });
 
 test('시간만 수정', async ({ page, createEvent }) => {
